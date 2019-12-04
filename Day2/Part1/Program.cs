@@ -9,7 +9,7 @@ namespace Day2
     {
         static List<int> _pgm;
         static int _pcnt = 0;
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
             _pgm = File.ReadAllText("input.txt")
                 .Split(',')

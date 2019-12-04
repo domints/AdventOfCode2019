@@ -8,7 +8,7 @@ namespace Day2
     class Program
     {
         static List<int> Input;
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
             Input = File.ReadAllText("input.txt")
                 .Split(',')

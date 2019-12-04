@@ -7,7 +7,7 @@ namespace Day3
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
             var paths = File.ReadAllLines("input.txt")
                 .Select(l => l.Trim())
@@ -30,12 +30,12 @@ namespace Day3
             int x = 0, y = 0, distance = 0;
             foreach(var s in steps.Where(x => !string.IsNullOrWhiteSpace(x)))
             {
-                var dir = GetDirection(s[0]);
+                var (xA, yA) = GetDirection(s[0]);
                 var count = int.Parse(s.Substring(1));
                 for(int i = 0; i < count; i++)
                 {
-                    x += dir.xA;
-                    y += dir.yA;
+                    x += xA;
+                    y += yA;
                     distance++;
                     var key = (x, y);
                     if(entries.ContainsKey(key))
@@ -43,7 +43,7 @@ namespace Day3
                         if(second)
                         {
                             var e = entries[key];
-                            if(e.SecondCame) ;
+                            if(e.SecondCame) {}
                                 //distance = e.FirstDistance;
                             else
                             {
@@ -54,7 +54,7 @@ namespace Day3
                         else
                         {
                             var e = entries[key];
-                            if(e.FirstCame) ;
+                            if(e.FirstCame) {}
                                 //distance = e.FirstDistance;
                             else
                             {

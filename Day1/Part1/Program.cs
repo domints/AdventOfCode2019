@@ -6,7 +6,7 @@ namespace Day1
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
             var masses = File.ReadAllLines("input.txt")
                 .Select(l => l.Trim())

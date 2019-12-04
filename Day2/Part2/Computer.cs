@@ -5,7 +5,7 @@ namespace Day2
 {
     public class Computer
     {
-        private List<int> memory;
+        private readonly List<int> memory;
         private int counter = 0;
         public List<int> Memory => memory;
         public int ProgramCounter => counter;

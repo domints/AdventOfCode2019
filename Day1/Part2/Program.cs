@@ -6,7 +6,7 @@ namespace Day1
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
             var masses = File.ReadAllLines("input.txt")
                 .Select(l => l.Trim())
@@ -17,7 +17,7 @@ namespace Day1
 
         static decimal RequiredFuel(decimal moduleMass)
         {
-            Func<decimal, decimal> calcFuel = (input) => Math.Floor(input / 3) - 2m;
+            static decimal calcFuel(decimal input) => Math.Floor(input / 3) - 2m;
             var addedFuel = calcFuel(moduleMass);
             var fuel = addedFuel;
             while(addedFuel > 0) {
