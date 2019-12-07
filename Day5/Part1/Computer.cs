@@ -92,7 +92,7 @@ namespace Day5
         void ProcessStore(int value)
         {
             outputBuffer.Enqueue(value);
-            if(outputMethod != null) outputMethod(value);
+            outputMethod?.Invoke(value);
         }
     }
 

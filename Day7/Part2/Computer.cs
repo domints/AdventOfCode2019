@@ -1,18 +1,20 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 
-namespace Day5
+namespace Day7
 {
     public class Computer
     {
         private readonly List<int> memory;
-        private Queue<int> inputBuffer;
+        private ConcurrentQueue<int> inputBuffer;
         private Action<int> outputMethod;
-        private readonly Queue<int> outputBuffer;
+        private readonly ConcurrentQueue<int> outputBuffer;
         private int counter = 0;
         public List<int> Memory => memory;
-        public Queue<int> InputBuffer => inputBuffer;
-        public Queue<int> OutputBuffer => outputBuffer;
+        public ConcurrentQueue<int> InputBuffer => inputBuffer;
+        public ConcurrentQueue<int> OutputBuffer => outputBuffer;
         public int ProgramCounter => counter;
 
         Dictionary<int, IOperation> operations;
@@ -20,10 +22,10 @@ namespace Day5
         public Computer(List<int> memoryInput)
         {
             memory = new List<int>(memoryInput);
-            this.outputBuffer = new Queue<int>();
+            this.outputBuffer = new ConcurrentQueue<int>();
         }
 
-        public void Run(Queue<int> inputBuffer = null, Action<int> outputMethod = null)
+        public void Run(ConcurrentQueue<int> inputBuffer = null, Action<int> outputMethod = null)
         {
             this.inputBuffer = inputBuffer;
             this.outputMethod = outputMethod ?? (v => { });
@@ -157,12 +159,12 @@ namespace Day5
 
     class Load : IMemoryOperation
     {
-        private readonly Queue<int> inputBuffer;
+        private readonly ConcurrentQueue<int> inputBuffer;
 
-        public static Load I(Queue<int> inputBuffer) => new Load(inputBuffer);
+        public static Load I(ConcurrentQueue<int> inputBuffer) => new Load(inputBuffer);
 
         private Load() { }
-        private Load(Queue<int> inputBuffer)
+        private Load(ConcurrentQueue<int> inputBuffer)
         {
             this.inputBuffer = inputBuffer;
         }
@@ -172,8 +174,13 @@ namespace Day5
 
         public void Exec(List<int> memory, int[] inputs, int[] outAddr)
         {
-            System.Diagnostics.Debugger.Break();
-            memory[outAddr[0]] = inputBuffer.Dequeue();
+            var success = false;
+            while(!success)
+            {
+                Thread.Sleep(1);
+                success = inputBuffer.TryDequeue(out int value);
+                if(success) memory[outAddr[0]] = value;
+            }
         }
     }
 

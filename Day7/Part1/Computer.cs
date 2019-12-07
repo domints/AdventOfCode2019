@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Day5
+namespace Day7
 {
     public class Computer
     {
@@ -172,7 +172,6 @@ namespace Day5
 
         public void Exec(List<int> memory, int[] inputs, int[] outAddr)
         {
-            System.Diagnostics.Debugger.Break();
             memory[outAddr[0]] = inputBuffer.Dequeue();
         }
     }

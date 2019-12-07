@@ -7,7 +7,7 @@ namespace Day5
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
             Console.ReadKey();
             var programMemory = File.ReadAllText("input.txt")

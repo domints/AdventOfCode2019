@@ -9,7 +9,7 @@ namespace Day6
     {
         const string FROM = "YOU";
         const string TO = "SAN";
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
             var map = File.ReadAllLines("input.txt")
                 .Select(l => l.Trim())

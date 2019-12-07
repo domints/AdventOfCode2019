@@ -7,7 +7,7 @@ namespace Day6
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
             var map = File.ReadAllLines("input.txt")
                 .Select(l => l.Trim())
