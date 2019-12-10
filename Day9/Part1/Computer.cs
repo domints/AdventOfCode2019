@@ -10,26 +10,26 @@ namespace Day9
     {
         private const int HaltOpCode = 99;
 
-        private readonly List<int> memory;
-        private ConcurrentQueue<int> inputBuffer;
-        private Action<int> outputMethod;
-        private readonly ConcurrentQueue<int> outputBuffer;
+        private readonly List<long> memory;
+        private ConcurrentQueue<long> inputBuffer;
+        private Action<long> outputMethod;
+        private readonly ConcurrentQueue<long> outputBuffer;
         private int counter = 0;
         private int relativeOffset = 0;
-        public List<int> Memory => memory;
-        public ConcurrentQueue<int> InputBuffer => inputBuffer;
-        public ConcurrentQueue<int> OutputBuffer => outputBuffer;
+        public List<long> Memory => memory;
+        public ConcurrentQueue<long> InputBuffer => inputBuffer;
+        public ConcurrentQueue<long> OutputBuffer => outputBuffer;
         public int ProgramCounter => counter;
 
         Dictionary<int, IOperation> operations;
 
-        public Computer(List<int> memoryInput)
+        public Computer(List<long> memoryInput)
         {
-            memory = new List<int>(memoryInput);
-            this.outputBuffer = new ConcurrentQueue<int>();
+            memory = new List<long>(memoryInput);
+            this.outputBuffer = new ConcurrentQueue<long>();
         }
 
-        public void Run(ConcurrentQueue<int> inputBuffer = null, Action<int> outputMethod = null)
+        public void Run(ConcurrentQueue<long> inputBuffer = null, Action<long> outputMethod = null)
         {
             this.inputBuffer = inputBuffer;
             this.outputMethod = outputMethod ?? (v => { });
@@ -66,31 +66,31 @@ namespace Day9
             return true;
         }
 
-        (int[] inputs, int[] outAddr) GetParameters(IOperation operation, string paramModes)
+        (long[] inputs, int[] outAddr) GetParameters(IOperation operation, string paramModes)
         {
             var modes = paramModes.ToCharArray();
             Array.Reverse(modes);
-            int[] inps = new int[operation.Inputs];
+            long[] inps = new long[operation.Inputs];
             for (int i = 0; i < operation.Inputs; i++)
             {
                 int inputAddr = 0;
                 switch (modes[i])
                 {
                     case '0':
-                        inputAddr = memory[counter + 1 + i];
+                        inputAddr = (int)memory[counter + 1 + i];
                         break;
                     case '1':
                         inputAddr = counter + 1 + i;
                         break;
                     case '2': 
-                        inputAddr = memory[counter + 1 + i] + relativeOffset;
+                        inputAddr = (int)memory[counter + 1 + i] + relativeOffset;
                         break;
                 }
 
                 if(inputAddr > memory.Count - 1)
                 {
                     memory.AddRange(
-                        Enumerable.Range(0, inputAddr - memory.Count + 1).Select(_ => 0)
+                        Enumerable.Range(0, inputAddr - memory.Count + 1).Select(_ => 0L)
                     );
                 }
 
@@ -113,11 +113,11 @@ namespace Day9
                 if(outputAddr > memory.Count - 1)
                 {
                     memory.AddRange(
-                        Enumerable.Range(0, outputAddr - memory.Count + 1).Select(_ => 0)
+                        Enumerable.Range(0, outputAddr - memory.Count + 1).Select(_ => 0L)
                     );
                 }
 
-                outs[i] = memory[outputAddr];
+                outs[i] = (int)memory[outputAddr];
             }
 
             return (inps, outs);
@@ -129,7 +129,7 @@ namespace Day9
             var newPointer = -1;
             if(operation is IJumpOperation jumpOp)
             {
-                newPointer = jumpOp.Exec(memory, ins, outs);
+                newPointer = jumpOp.Exec(memory, ins);
             }
             else if(operation is IMemoryOperation memOp)
             {
@@ -148,7 +148,7 @@ namespace Day9
                 counter = newPointer;
         }
 
-        void ProcessStore(int value)
+        void ProcessStore(long value)
         {
             outputBuffer.Enqueue(value);
             outputMethod?.Invoke(value);
@@ -163,17 +163,17 @@ namespace Day9
 
     interface IMemoryOperation : IOperation
     {
-        void Exec(List<int> memory, int[] inputs, int[] outputAddr);
+        void Exec(List<long> memory, long[] inputs, int[] outputAddr);
     }
 
     interface IJumpOperation : IOperation
     {
-        int Exec(List<int> memory, int[] inputs, int[] outputAddr);
+        int Exec(List<long> memory, long[] inputs);
     }
 
     interface IRelativeAdjustOperation : IOperation
     {
-        int Exec(int[] inputs, int currentRelative);
+        int Exec(long[] inputs, int currentRelative);
     }
 
     class Add : IMemoryOperation
@@ -183,7 +183,7 @@ namespace Day9
         public int Inputs => 2;
         public int Outputs => 1;
 
-        public void Exec(List<int> memory, int[] inputs, int[] outAddr)
+        public void Exec(List<long> memory, long[] inputs, int[] outAddr)
         {
             memory[outAddr[0]] = inputs[0] + inputs[1];
         }
@@ -195,7 +195,7 @@ namespace Day9
         public int Inputs => 2;
         public int Outputs => 1;
 
-        public void Exec(List<int> memory, int[] inputs, int[] outAddr)
+        public void Exec(List<long> memory, long[] inputs, int[] outAddr)
         {
             memory[outAddr[0]] = inputs[0] * inputs[1];
         }
@@ -203,12 +203,12 @@ namespace Day9
 
     class Load : IMemoryOperation
     {
-        private readonly ConcurrentQueue<int> inputBuffer;
+        private readonly ConcurrentQueue<long> inputBuffer;
 
-        public static Load I(ConcurrentQueue<int> inputBuffer) => new Load(inputBuffer);
+        public static Load I(ConcurrentQueue<long> inputBuffer) => new Load(inputBuffer);
 
         private Load() { }
-        private Load(ConcurrentQueue<int> inputBuffer)
+        private Load(ConcurrentQueue<long> inputBuffer)
         {
             this.inputBuffer = inputBuffer;
         }
@@ -216,13 +216,13 @@ namespace Day9
         public int Inputs => 0;
         public int Outputs => 1;
 
-        public void Exec(List<int> memory, int[] inputs, int[] outAddr)
+        public void Exec(List<long> memory, long[] inputs, int[] outAddr)
         {
             var success = false;
             while(!success)
             {
                 Thread.Sleep(1);
-                success = inputBuffer.TryDequeue(out int value);
+                success = inputBuffer.TryDequeue(out long value);
                 if(success) memory[outAddr[0]] = value;
             }
         }
@@ -230,11 +230,11 @@ namespace Day9
 
     class Store : IMemoryOperation
     {
-        public static Store I(Action<int> storeAction) => new Store(storeAction);
-        private readonly Action<int> storeAction;
+        public static Store I(Action<long> storeAction) => new Store(storeAction);
+        private readonly Action<long> storeAction;
 
         private Store() { }
-        private Store(Action<int> storeAction)
+        private Store(Action<long> storeAction)
         {
             this.storeAction = storeAction;
         }
@@ -242,7 +242,7 @@ namespace Day9
         public int Inputs => 1;
         public int Outputs => 0;
 
-        public void Exec(List<int> memory, int[] inputs, int[] outAddr)
+        public void Exec(List<long> memory, long[] inputs, int[] outAddr)
         {
             storeAction(inputs[0]);
         }
@@ -254,9 +254,9 @@ namespace Day9
         public int Inputs => 2;
         public int Outputs => 0;
 
-        public int Exec(List<int> memory, int[] inputs, int[] outAddr)
+        public int Exec(List<long> memory, long[] inputs)
         {
-            return inputs[0] == 0 ? -1 : inputs[1];
+            return inputs[0] == 0 ? -1 : (int)inputs[1];
         }
     }
 
@@ -266,9 +266,9 @@ namespace Day9
         public int Inputs => 2;
         public int Outputs => 0;
 
-        public int Exec(List<int> memory, int[] inputs, int[] outAddr)
+        public int Exec(List<long> memory, long[] inputs)
         {
-            return inputs[0] == 0 ? inputs[1] : -1;
+            return inputs[0] == 0 ? (int)inputs[1] : -1;
         }
     }
 
@@ -278,7 +278,7 @@ namespace Day9
         public int Inputs => 2;
         public int Outputs => 1;
 
-        public void Exec(List<int> memory, int[] inputs, int[] outAddr)
+        public void Exec(List<long> memory, long[] inputs, int[] outAddr)
         {
             memory[outAddr[0]] = inputs[0] < inputs[1] ? 1 : 0;
         }
@@ -290,7 +290,7 @@ namespace Day9
         public int Inputs => 2;
         public int Outputs => 1;
 
-        public void Exec(List<int> memory, int[] inputs, int[] outAddr)
+        public void Exec(List<long> memory, long[] inputs, int[] outAddr)
         {
             memory[outAddr[0]] = inputs[0] == inputs[1] ? 1 : 0;
         }
@@ -302,9 +302,9 @@ namespace Day9
         public int Inputs => 1;
         public int Outputs => 0;
 
-        public int Exec(int[] inputs, int currentRelative)
+        public int Exec(long[] inputs, int currentRelative)
         {
-            return inputs[0];
+            return (int)inputs[0];
         }
     }
 }
