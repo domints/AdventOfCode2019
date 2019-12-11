@@ -8,7 +8,7 @@ namespace Day9
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
             Console.WriteLine("Start");
             var input = File.ReadAllText("input.txt")
