@@ -90,7 +90,7 @@ namespace Day9
                 if(inputAddr > memory.Count - 1)
                 {
                     memory.AddRange(
-                        Enumerable.Range(0, inputAddr - memory.Count + 1).Select(_ => 0L)
+                        Enumerable.Range(0, inputAddr - memory.Count + 2).Select(_ => 0L)
                     );
                 }
 
@@ -103,21 +103,23 @@ namespace Day9
                 int outputAddr = 0;
                 if(modes[operation.Inputs + i] == '0')
                 {
-                    outputAddr = counter + operation.Inputs + i + 1;
+                    outputAddr = (int)memory[counter + operation.Inputs + i + 1];
                 }
                 else if(modes[operation.Inputs + i] == '2')
                 {
-                    outputAddr = counter + operation.Inputs + i + 1 + relativeOffset;
+                    outputAddr = (int)memory[counter + operation.Inputs + i + 1] + relativeOffset;
                 }
 
                 if(outputAddr > memory.Count - 1)
                 {
                     memory.AddRange(
-                        Enumerable.Range(0, outputAddr - memory.Count + 1).Select(_ => 0L)
+                        Enumerable.Range(0, outputAddr - memory.Count + 2).Select(_ => 0L)
                     );
                 }
 
-                outs[i] = (int)memory[outputAddr];
+                if(outputAddr < 0) throw new InvalidOperationException("Output address cannot be negative!"); 
+
+                outs[i] = outputAddr;
             }
 
             return (inps, outs);

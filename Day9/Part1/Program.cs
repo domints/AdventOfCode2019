@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,10 +19,10 @@ namespace Day9
                 .ToList();
             
             Console.WriteLine("Loaded input");
-
+            
             var comp = new Computer(input);
-            comp.Run();
-            Console.WriteLine(string.Join(',', comp.Memory));
+            comp.Run(inputBuffer: new ConcurrentQueue<long>(new [] { 2L }), outputMethod: (v) => Console.Write($"{v},"));
+            Console.WriteLine();
         }
     }
 }
