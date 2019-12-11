@@ -304,7 +304,7 @@ namespace Day9
 
         public int Exec(long[] inputs, int currentRelative)
         {
-            return (int)inputs[0];
+            return currentRelative + (int)inputs[0];
         }
     }
 }
