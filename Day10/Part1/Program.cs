@@ -28,7 +28,6 @@ namespace Day10
             {
                 for(int y = 0; y < asteroids[x].Count; y++)
                 {
-                    //Console.Write(asteroids[x][y] ? '＃': '＇');
                     Console.Write(asteroids[x][y] ? " #": " '");
                 }
                 Console.WriteLine();
