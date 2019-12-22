@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DecimalMath;
 
 namespace Day10
 {
@@ -9,6 +10,7 @@ namespace Day10
     {
         static bool[][] asteroids;
         static Dictionary<(int x, int y), List<(int x, int y)>> matches = new Dictionary<(int x, int y), List<(int x, int y)>>();
+        static Dictionary<decimal, List<AsteroidToLaser>> angledAsteroids = new Dictionary<decimal, List<AsteroidToLaser>>();
         static int xSize = 0;
         static int ySize = 0;
         static void Main(string[] _)
@@ -42,6 +44,76 @@ namespace Day10
             PrintAsteroidMap(bestAsteroid.x, bestAsteroid.y);
 
             Console.WriteLine($"{bestAsteroid.x},{bestAsteroid.y}: {bestAsteroid.count}");
+
+            CalculateAngles(bestAsteroid.x, bestAsteroid.y);
+            //Console.ReadLine();
+            var goodBurn = Find200thBurn();
+            Console.WriteLine($"200th burn is at: {goodBurn.x},{goodBurn.y}");
+        }
+
+        static void CalculateAngles(int cx, int cy)
+        {
+            static decimal pythagoras(decimal a, decimal b)
+            {
+                return DecimalEx.Sqrt(DecimalEx.Pow(a, 2) + DecimalEx.Pow(b, 2));
+            }
+
+            for (int x = 0; x < xSize; x++)
+                for(int y = 0; y < ySize; y++)
+                {
+                    if(!asteroids[x][y] || (x == cx && y == cy)) continue;
+                    var diffX = x - cx;
+                    var diffY = y - cy;
+                    var angle = DecimalEx.ATan2(diffY, diffX);
+                    if(angle < (-1m * (DecimalEx.Pi / 2m)))
+                    {
+                        angle += DecimalEx.Pi * 2m;
+                    }
+                    var distance = pythagoras(diffX, diffY);
+                    var obj = new AsteroidToLaser
+                    {
+                        Angle = angle,
+                        Distance = distance,
+                        X = x,
+                        Y = y
+                    };
+                    if(angledAsteroids.ContainsKey(angle))
+                    {
+                        angledAsteroids[angle].Add(obj);
+                    }
+                    else
+                        angledAsteroids.Add(angle, new List<AsteroidToLaser> { obj });
+                }
+        }
+
+        static (int x, int y) Find200thBurn()
+        {
+            int burnCount = 0;
+            bool burntSomething = true;
+            while(burnCount < 200 && burntSomething)
+            {
+                burntSomething = false;
+                foreach(var angle in angledAsteroids.Keys.OrderBy(x => x))
+                {
+                    var asteroidToBurn = angledAsteroids[angle]
+                        .Where(a => !a.IsDestroyed)
+                        .OrderBy(a => a.Distance)
+                        .FirstOrDefault();
+                    if(asteroidToBurn != null)
+                    {
+                        //if(burnCount + 1 > 0 && burnCount + 1 < 20)
+                            //Console.WriteLine($"Burnt asteroid #{burnCount + 1} at {asteroidToBurn.X},{asteroidToBurn.Y}");
+                        asteroidToBurn.IsDestroyed = true;
+                        burntSomething = true;
+                        if(++burnCount == 200)
+                        {
+                            return (asteroidToBurn.X, asteroidToBurn.Y);
+                        }
+                    }
+                }
+            }
+
+            return (-1, -1);
         }
 
         static void PrintAsteroidMap(int cx, int cy)
@@ -133,6 +205,20 @@ namespace Day10
             }
 
             return false;
+        }
+
+        class AsteroidToLaser
+        {
+            public int X { get; set; }
+            public int Y { get; set; }
+            public decimal Distance { get; set; }
+            public decimal Angle { get; set; }
+            public bool IsDestroyed { get; set; }
+
+            public override string ToString()
+            {
+                return $"({X},{Y}), {Distance}, {Angle}, {IsDestroyed}";
+            }
         }
     }
 }
