@@ -48,7 +48,6 @@ namespace Day7
 
         static int RunComputers(int a, int b, int c, int d, int e, List<int> program)
         {
-            var result = 0;
             var c1 = new Computer(program);
             var c2 = new Computer(program);
             var c3 = new Computer(program);
